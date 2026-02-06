@@ -1,0 +1,236 @@
+{
+  "members": [
+    {
+      "name": "Strategy",
+      "logo_url": "logos/strategy-logo-light.png",
+      "tier": "founding",
+      "is_founding": true
+    },
+    {
+      "name": "BTC Inc",
+      "logo_url": "logos/btc-inc-logo-light.png",
+      "tier": "founding",
+      "is_founding": true
+    },
+    {
+      "name": "Treasury",
+      "logo_url": "logos/treasury-logo-light.png",
+      "tier": "chairmans_circle",
+      "is_founding": false
+    },
+    {
+      "name": "Aifinyo",
+      "logo_url": "logos/aifinyo-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "Avalon Labs",
+      "logo_url": "logos/avalon-labs-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "BitGo",
+      "logo_url": "logos/bitgo-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "Byte Federal",
+      "logo_url": "logos/byte-federal-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "Crypto.com",
+      "logo_url": "logos/crypto-com-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "DDC Enterprise",
+      "logo_url": "logos/ddc-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "Fold",
+      "logo_url": "logos/fold-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "GIGA",
+      "logo_url": "logos/giga-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "Kraken Institutional",
+      "logo_url": "logos/kraken-institutional-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "KULR",
+      "logo_url": "logos/kulr-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "The London Bitcoin Co.",
+      "logo_url": "logos/london-bitcoin-co-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "LQWD",
+      "logo_url": "logos/lqwd-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "Méliuz",
+      "logo_url": "logos/meliuz-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "MNAV",
+      "logo_url": "logos/mnav-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "NaaS",
+      "logo_url": "logos/naas-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "Nakamoto",
+      "logo_url": "logos/nakamoto-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "Prenetics",
+      "logo_url": "logos/prenetics-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "PublicSquare",
+      "logo_url": "logos/public-square-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "SALT",
+      "logo_url": "logos/salt-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "Samara",
+      "logo_url": "logos/samara-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "Solar Strategy",
+      "logo_url": "logos/solar-strategy-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "Strive",
+      "logo_url": "logos/strive-logo-light.png",
+      "tier": "executive",
+      "is_founding": false
+    },
+    {
+      "name": "Blockspaces",
+      "logo_url": "logos/blockspaces-logo-light.png",
+      "tier": "premier",
+      "is_founding": false
+    },
+    {
+      "name": "Capital B",
+      "logo_url": "logos/capital-b-logo-light.png",
+      "tier": "premier",
+      "is_founding": false
+    },
+    {
+      "name": "Jetking",
+      "logo_url": "logos/jetking-logo-light.png",
+      "tier": "premier",
+      "is_founding": false
+    },
+    {
+      "name": "Metaplanet",
+      "logo_url": "logos/meteplanet-logo-light.png",
+      "tier": "premier",
+      "is_founding": false
+    },
+    {
+      "name": "Next Layer Capital",
+      "logo_url": "logos/next-layer-capital-logo-light.png",
+      "tier": "premier",
+      "is_founding": false
+    },
+    {
+      "name": "Semler Scientific",
+      "logo_url": "logos/semler-scientific-logo-light.png",
+      "tier": "premier",
+      "is_founding": false
+    },
+    {
+      "name": "UTXO",
+      "logo_url": "logos/utxo-logo-light.png",
+      "tier": "premier",
+      "is_founding": false
+    },
+    {
+      "name": "Matador",
+      "logo_url": "logos/matador-logo-light.png",
+      "tier": "industry",
+      "is_founding": false
+    },
+    {
+      "name": "Locate",
+      "logo_url": "logos/locate-technologies-logo-light.png",
+      "tier": "industry",
+      "is_founding": false
+    },
+    {
+      "name": "Uproot",
+      "logo_url": "logos/uproot-company-logo-light.png",
+      "tier": "industry",
+      "is_founding": false
+    }
+  ],
+  "tiers": {
+    "founding": {
+      "label": "Founding Members",
+      "order": 1
+    },
+    "chairmans_circle": {
+      "label": "Chairman's Circle",
+      "order": 2
+    },
+    "executive": {
+      "label": "Executive Members",
+      "order": 3
+    },
+    "premier": {
+      "label": "Premier Members",
+      "order": 4
+    },
+    "industry": {
+      "label": "Industry Members",
+      "order": 5
+    }
+  }
+}
