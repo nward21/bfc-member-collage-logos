@@ -15,22 +15,23 @@ export function BfcLogoGrid({
   mode = 'tiered',
   members = [],
   baseUrl = '',
-  fixedSize = null,
+  fixedWidth = null, // For PNG export - sets exact width, height scales proportionally
 }) {
-  const isFixed = fixedSize !== null;
-  const scale = isFixed ? (fixedSize.width / 1000) : 1;
+  const scale = fixedWidth ? (fixedWidth / 1000) : 1;
 
   const styles = {
     container: {
       backgroundColor: '#000',
       padding: `${40 * scale}px`,
-      width: isFixed ? `${fixedSize.width}px` : '100%',
-      height: isFixed ? `${fixedSize.height}px` : undefined,
-      aspectRatio: isFixed ? undefined : (ratio === 'landscape' ? '16 / 9' : '1 / 1'),
+      width: fixedWidth ? `${fixedWidth}px` : '100%',
+      aspectRatio: fixedWidth ? undefined : (ratio === 'landscape' ? '16 / 9' : '1 / 1'),
       boxSizing: 'border-box',
     },
     tierSection: {
       marginBottom: `${32 * scale}px`,
+    },
+    tierSectionLast: {
+      marginBottom: 0,
     },
     tierLabel: {
       color: '#fff',
@@ -138,17 +139,19 @@ export function BfcLogoGrid({
     const grouped = groupByTier(members);
     const largeTiers = ['founding', 'chairmans_circle'];
     const singleRowTiers = ['founding', 'chairmans_circle', 'premier', 'industry'];
+    const activeTiers = tierOrder.filter(t => grouped[t]?.length > 0);
 
     return (
       <div style={styles.container}>
-        {tierOrder.map(tier => {
+        {tierOrder.map((tier, index) => {
           const tierMembers = grouped[tier];
           if (!tierMembers || tierMembers.length === 0) return null;
           const isLarge = largeTiers.includes(tier);
           const isSingleRow = singleRowTiers.includes(tier);
+          const isLast = tier === activeTiers[activeTiers.length - 1];
 
           return (
-            <div key={tier} style={styles.tierSection}>
+            <div key={tier} style={isLast ? styles.tierSectionLast : styles.tierSection}>
               <div style={styles.tierLabel}>{tierLabels[tier]}</div>
               <div style={isSingleRow ? styles.logoGridTopTier : styles.logoGrid}>
                 {tierMembers.map(m => renderLogo(m, isLarge))}
