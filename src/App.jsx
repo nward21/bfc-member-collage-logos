@@ -4,9 +4,9 @@ import { BfcLogoGrid } from './BfcLogoGrid';
 import { MemberEditor } from './MemberEditor';
 import membersData from '../members.json';
 
-const PNG_WIDTHS = {
-  landscape: 1600,
-  square: 1500,
+const PNG_SIZES = {
+  landscape: { width: 1600, height: 900 },
+  square: { width: 1500, height: 1500 },
 };
 
 const styles = {
@@ -214,10 +214,10 @@ function App() {
     const key = `${targetRatio}-${targetMode}`;
     setGenerating(key);
 
-    const width = PNG_WIDTHS[targetRatio];
+    const size = PNG_SIZES[targetRatio];
 
     // Set up the hidden render
-    setPngRender({ ratio: targetRatio, mode: targetMode, width });
+    setPngRender({ ratio: targetRatio, mode: targetMode, size });
 
     // Wait for render and images to load
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -258,10 +258,10 @@ function App() {
   };
 
   const pngOptions = [
-    { ratio: 'landscape', mode: 'tiered', label: 'Landscape Tiered', desc: '1600px wide, with tier labels' },
-    { ratio: 'landscape', mode: 'alphabetical', label: 'Landscape Alphabetical', desc: '1600px wide, sorted A-Z' },
-    { ratio: 'square', mode: 'tiered', label: 'Square Tiered', desc: '1500px wide, with tier labels' },
-    { ratio: 'square', mode: 'alphabetical', label: 'Square Alphabetical', desc: '1500px wide, sorted A-Z' },
+    { ratio: 'landscape', mode: 'tiered', label: 'Landscape Tiered', desc: '1600x900px, with tier labels' },
+    { ratio: 'landscape', mode: 'alphabetical', label: 'Landscape Alphabetical', desc: '1600x900px, sorted A-Z' },
+    { ratio: 'square', mode: 'tiered', label: 'Square Tiered', desc: '1500x1500px, with tier labels' },
+    { ratio: 'square', mode: 'alphabetical', label: 'Square Alphabetical', desc: '1500x1500px, sorted A-Z' },
   ];
 
   if (editMode) {
@@ -408,7 +408,7 @@ function App() {
             mode={pngRender.mode}
             members={members}
             baseUrl=""
-            fixedWidth={pngRender.width}
+            fixedSize={pngRender.size}
           />
         </div>
       )}
