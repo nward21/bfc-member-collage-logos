@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import { BfcLogoGrid } from './BfcLogoGrid';
+import { MemberEditor } from './MemberEditor';
 import membersData from '../members.json';
 
 const styles = {
@@ -64,6 +65,17 @@ const styles = {
     backgroundColor: '#f7931a',
     color: '#000',
   },
+  editButton: {
+    padding: '8px 16px',
+    fontSize: '14px',
+    fontWeight: '500',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    backgroundColor: '#3b82f6',
+    color: '#fff',
+    marginLeft: 'auto',
+  },
   previewSection: {
     padding: '40px',
   },
@@ -116,6 +128,7 @@ const styles = {
   statsBar: {
     display: 'flex',
     gap: '24px',
+    alignItems: 'center',
   },
   stat: {
     fontSize: '13px',
@@ -156,11 +169,6 @@ const styles = {
     fontSize: '12px',
     color: '#888',
   },
-  hiddenRender: {
-    position: 'absolute',
-    left: '-9999px',
-    top: 0,
-  },
 };
 
 function App() {
@@ -168,8 +176,9 @@ function App() {
   const [mode, setMode] = useState('tiered');
   const [copied, setCopied] = useState(false);
   const [generating, setGenerating] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [members, setMembers] = useState(membersData.members);
 
-  const members = membersData.members;
   const previewRef = useRef(null);
 
   const hostUrl = 'https://nward21.github.io/bfc-member-collage-logos';
@@ -192,13 +201,11 @@ function App() {
     const key = `${targetRatio}-${targetMode}`;
     setGenerating(key);
 
-    // Temporarily update the preview to the target settings
     const prevRatio = ratio;
     const prevMode = mode;
     setRatio(targetRatio);
     setMode(targetMode);
 
-    // Wait for render
     await new Promise(resolve => setTimeout(resolve, 100));
 
     if (previewRef.current) {
@@ -217,10 +224,28 @@ function App() {
       }
     }
 
-    // Restore previous settings
     setRatio(prevRatio);
     setMode(prevMode);
     setGenerating(null);
+  };
+
+  const handleSaveMembers = (updatedMembers) => {
+    setMembers(updatedMembers);
+    setEditMode(false);
+
+    // Download the updated JSON
+    const json = JSON.stringify({
+      members: updatedMembers,
+      tiers: membersData.tiers,
+    }, null, 2);
+
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'members.json';
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const tierCounts = {
@@ -237,6 +262,24 @@ function App() {
     { ratio: 'square', mode: 'tiered', label: 'Square Tiered', desc: '1:1 with tier labels' },
     { ratio: 'square', mode: 'alphabetical', label: 'Square Alphabetical', desc: '1:1 sorted A-Z' },
   ];
+
+  if (editMode) {
+    return (
+      <div style={styles.dashboard}>
+        <header style={styles.header}>
+          <div>
+            <h1 style={styles.title}>BFC Logo Grid Workbench</h1>
+            <p style={styles.subtitle}>Drag and drop to reorganize members</p>
+          </div>
+        </header>
+        <MemberEditor
+          members={members}
+          onSave={handleSaveMembers}
+          onCancel={() => setEditMode(false)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div style={styles.dashboard}>
@@ -303,6 +346,13 @@ function App() {
             </button>
           </div>
         </div>
+
+        <button
+          style={styles.editButton}
+          onClick={() => setEditMode(true)}
+        >
+          Edit Members
+        </button>
       </div>
 
       <section style={styles.previewSection}>
