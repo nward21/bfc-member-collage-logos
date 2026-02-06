@@ -15,61 +15,46 @@ export function BfcLogoGrid({
   mode = 'tiered',
   members = [],
   baseUrl = '',
-  fixedSize = null, // { width, height } for PNG export
+  fixedSize = null,
 }) {
   const isFixed = fixedSize !== null;
-  const width = fixedSize?.width || (ratio === 'landscape' ? 1600 : 1500);
-  const height = fixedSize?.height || (ratio === 'landscape' ? 900 : 1500);
-
-  // Scale factors based on container size
-  const scaleFactor = isFixed ? width / 1200 : 1;
+  const scale = isFixed ? (fixedSize.width / 1000) : 1;
 
   const styles = {
     container: {
       backgroundColor: '#000',
-      padding: `${40 * scaleFactor}px`,
-      width: isFixed ? `${width}px` : '100%',
-      height: isFixed ? `${height}px` : 'auto',
+      padding: `${40 * scale}px`,
+      width: isFixed ? `${fixedSize.width}px` : '100%',
+      height: isFixed ? `${fixedSize.height}px` : undefined,
       aspectRatio: isFixed ? undefined : (ratio === 'landscape' ? '16 / 9' : '1 / 1'),
       boxSizing: 'border-box',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
     },
     tierSection: {
-      marginBottom: isFixed ? 0 : `${24 * scaleFactor}px`,
-      flex: mode === 'tiered' ? 1 : undefined,
-      display: 'flex',
-      flexDirection: 'column',
+      marginBottom: `${32 * scale}px`,
     },
     tierLabel: {
       color: '#fff',
-      fontSize: `${14 * scaleFactor}px`,
+      fontSize: `${14 * scale}px`,
       fontWeight: '600',
       textTransform: 'uppercase',
-      letterSpacing: `${2 * scaleFactor}px`,
-      marginBottom: `${12 * scaleFactor}px`,
-      paddingBottom: `${8 * scaleFactor}px`,
+      letterSpacing: `${2 * scale}px`,
+      marginBottom: `${16 * scale}px`,
+      paddingBottom: `${8 * scale}px`,
       borderBottom: '1px solid rgba(255,255,255,0.2)',
-      flexShrink: 0,
     },
-    logoRow: {
+    logoGrid: {
+      display: 'grid',
+      gridTemplateColumns: `repeat(auto-fit, minmax(${150 * scale}px, 1fr))`,
+      gap: `${24 * scale}px ${16 * scale}px`,
+      alignItems: 'center',
+      justifyItems: 'start',
+    },
+    logoGridTopTier: {
       display: 'flex',
       flexWrap: 'wrap',
-      gap: `${16 * scaleFactor}px`,
+      gap: `${24 * scale}px ${40 * scale}px`,
       alignItems: 'center',
       justifyContent: 'flex-start',
-      flex: 1,
-      alignContent: 'center',
-    },
-    logoRowSpread: {
-      display: 'flex',
-      flexWrap: 'wrap',
-      rowGap: `${20 * scaleFactor}px`,
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      flex: 1,
-      alignContent: 'center',
     },
     logoItem: {
       display: 'flex',
@@ -77,29 +62,20 @@ export function BfcLogoGrid({
       justifyContent: 'center',
     },
     logoImg: {
-      maxHeight: `${40 * scaleFactor}px`,
-      maxWidth: `${120 * scaleFactor}px`,
+      maxHeight: `${40 * scale}px`,
+      maxWidth: `${120 * scale}px`,
       objectFit: 'contain',
     },
     logoImgLarge: {
-      maxHeight: `${50 * scaleFactor}px`,
-      maxWidth: `${150 * scaleFactor}px`,
+      maxHeight: `${48 * scale}px`,
+      maxWidth: `${144 * scale}px`,
       objectFit: 'contain',
     },
     logoPlaceholder: {
       color: '#fff',
-      fontSize: `${14 * scaleFactor}px`,
+      fontSize: `${14 * scale}px`,
       fontWeight: '500',
       whiteSpace: 'nowrap',
-    },
-    alphabeticalGrid: {
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: `${20 * scaleFactor}px`,
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      alignContent: 'space-between',
-      flex: 1,
     },
   };
 
@@ -174,7 +150,7 @@ export function BfcLogoGrid({
           return (
             <div key={tier} style={styles.tierSection}>
               <div style={styles.tierLabel}>{tierLabels[tier]}</div>
-              <div style={isSingleRow ? styles.logoRow : styles.logoRowSpread}>
+              <div style={isSingleRow ? styles.logoGridTopTier : styles.logoGrid}>
                 {tierMembers.map(m => renderLogo(m, isLarge))}
               </div>
             </div>
@@ -189,7 +165,7 @@ export function BfcLogoGrid({
 
   return (
     <div style={styles.container}>
-      <div style={styles.alphabeticalGrid}>
+      <div style={styles.logoGrid}>
         {sortedMembers.map(m => renderLogo(m, m.is_founding))}
       </div>
     </div>

@@ -178,8 +178,8 @@ const styles = {
     position: 'fixed',
     left: '-9999px',
     top: 0,
-    visibility: 'hidden',
     pointerEvents: 'none',
+    zIndex: -1,
   },
 };
 
@@ -220,7 +220,7 @@ function App() {
     setPngRender({ ratio: targetRatio, mode: targetMode, size });
 
     // Wait for render and images to load
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     if (pngRef.current) {
       try {
