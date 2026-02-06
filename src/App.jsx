@@ -232,20 +232,6 @@ function App() {
   const handleSaveMembers = (updatedMembers) => {
     setMembers(updatedMembers);
     setEditMode(false);
-
-    // Download the updated JSON
-    const json = JSON.stringify({
-      members: updatedMembers,
-      tiers: membersData.tiers,
-    }, null, 2);
-
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'members.json';
-    link.click();
-    URL.revokeObjectURL(url);
   };
 
   const tierCounts = {
@@ -274,6 +260,7 @@ function App() {
         </header>
         <MemberEditor
           members={members}
+          tiers={membersData.tiers}
           onSave={handleSaveMembers}
           onCancel={() => setEditMode(false)}
         />

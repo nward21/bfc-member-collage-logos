@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -16,6 +16,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { getGitHubToken, setGitHubToken, saveToGitHub, validateToken } from './github';
 
 const tierOrder = ['founding', 'chairmans_circle', 'executive', 'premier', 'industry'];
 
@@ -60,12 +61,21 @@ const styles = {
     backgroundColor: '#22c55e',
     color: '#fff',
   },
+  saveButtonDisabled: {
+    backgroundColor: '#555',
+    color: '#888',
+    cursor: 'not-allowed',
+  },
   cancelButton: {
     backgroundColor: '#333',
     color: '#fff',
   },
   addButton: {
     backgroundColor: '#3b82f6',
+    color: '#fff',
+  },
+  settingsButton: {
+    backgroundColor: '#6b7280',
     color: '#fff',
   },
   tierSection: {
@@ -206,6 +216,33 @@ const styles = {
     borderRadius: '6px',
     border: '1px solid #333',
   },
+  tokenStatus: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontSize: '12px',
+    color: '#888',
+  },
+  tokenDot: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+  },
+  tokenConnected: {
+    backgroundColor: '#22c55e',
+  },
+  tokenDisconnected: {
+    backgroundColor: '#dc2626',
+  },
+  helpText: {
+    fontSize: '12px',
+    color: '#666',
+    marginTop: '8px',
+  },
+  link: {
+    color: '#3b82f6',
+    textDecoration: 'underline',
+  },
 };
 
 function SortableMember({ member, onDelete }) {
@@ -277,12 +314,21 @@ function DroppableTier({ tier, members, onDelete, isOver }) {
   );
 }
 
-export function MemberEditor({ members: initialMembers, onSave, onCancel }) {
+export function MemberEditor({ members: initialMembers, tiers, onSave, onCancel }) {
   const [members, setMembers] = useState(initialMembers);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [activeId, setActiveId] = useState(null);
   const [activeTier, setActiveTier] = useState(null);
   const [newMember, setNewMember] = useState({ name: '', tier: 'executive', logo_url: '' });
+  const [hasToken, setHasToken] = useState(false);
+  const [tokenInput, setTokenInput] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+
+  useEffect(() => {
+    setHasToken(!!getGitHubToken());
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -312,7 +358,6 @@ export function MemberEditor({ members: initialMembers, onSave, onCancel }) {
 
     if (!activeItem) return;
 
-    // If dropping on another member, get their tier
     if (overItem && activeItem.tier !== overItem.tier) {
       setMembers(prev => prev.map(m =>
         m.name === active.id ? { ...m, tier: overItem.tier } : m
@@ -369,19 +414,47 @@ export function MemberEditor({ members: initialMembers, onSave, onCancel }) {
     setShowAddModal(false);
   };
 
-  const handleSave = () => {
-    // Reorder to ensure tier order is maintained
+  const handleSave = async () => {
     const ordered = [];
     tierOrder.forEach(tier => {
       ordered.push(...members.filter(m => m.tier === tier));
     });
-    onSave(ordered);
+
+    if (!hasToken) {
+      setShowSettingsModal(true);
+      return;
+    }
+
+    setSaving(true);
+    setSaveError(null);
+
+    try {
+      await saveToGitHub(ordered, tiers);
+      onSave(ordered);
+    } catch (err) {
+      setSaveError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveToken = async () => {
+    if (!tokenInput) return;
+
+    const isValid = await validateToken(tokenInput);
+    if (isValid) {
+      setGitHubToken(tokenInput);
+      setHasToken(true);
+      setShowSettingsModal(false);
+      setTokenInput('');
+    } else {
+      alert('Invalid token or wrong account');
+    }
   };
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // For now, just use the filename - user will need to add the file manually
       const filename = file.name.replace(/\s+/g, '-').toLowerCase();
       setNewMember(prev => ({ ...prev, logo_url: `logos/${filename}` }));
     }
@@ -392,7 +465,16 @@ export function MemberEditor({ members: initialMembers, onSave, onCancel }) {
   return (
     <div style={styles.editor}>
       <div style={styles.header}>
-        <span style={styles.title}>Edit Members</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span style={styles.title}>Edit Members</span>
+          <div style={styles.tokenStatus}>
+            <div style={{
+              ...styles.tokenDot,
+              ...(hasToken ? styles.tokenConnected : styles.tokenDisconnected),
+            }} />
+            {hasToken ? 'Connected to GitHub' : 'Not connected'}
+          </div>
+        </div>
         <div style={styles.actions}>
           <button
             style={{ ...styles.button, ...styles.addButton }}
@@ -401,22 +483,39 @@ export function MemberEditor({ members: initialMembers, onSave, onCancel }) {
             + Add Member
           </button>
           <button
+            style={{ ...styles.button, ...styles.settingsButton }}
+            onClick={() => setShowSettingsModal(true)}
+          >
+            Settings
+          </button>
+          <button
             style={{ ...styles.button, ...styles.cancelButton }}
             onClick={onCancel}
           >
             Cancel
           </button>
           <button
-            style={{ ...styles.button, ...styles.saveButton }}
+            style={{
+              ...styles.button,
+              ...(hasToken && !saving ? styles.saveButton : styles.saveButtonDisabled),
+            }}
             onClick={handleSave}
+            disabled={!hasToken || saving}
           >
-            Save & Download JSON
+            {saving ? 'Saving...' : 'Save to GitHub'}
           </button>
         </div>
       </div>
 
+      {saveError && (
+        <div style={{ ...styles.instructions, borderColor: '#dc2626', color: '#dc2626' }}>
+          Error: {saveError}
+        </div>
+      )}
+
       <div style={styles.instructions}>
         Drag members between tiers to reorganize. Click X to remove a member.
+        {!hasToken && ' Click Settings to connect your GitHub account.'}
       </div>
 
       <DndContext
@@ -508,6 +607,58 @@ export function MemberEditor({ members: initialMembers, onSave, onCancel }) {
                 onClick={handleAddMember}
               >
                 Add Member
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSettingsModal && (
+        <div style={styles.overlay} onClick={() => setShowSettingsModal(false)}>
+          <div style={styles.modal} onClick={e => e.stopPropagation()}>
+            <div style={styles.modalTitle}>GitHub Settings</div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Personal Access Token</label>
+              <input
+                type="password"
+                style={styles.input}
+                value={tokenInput}
+                onChange={e => setTokenInput(e.target.value)}
+                placeholder="ghp_xxxxxxxxxxxx"
+              />
+              <p style={styles.helpText}>
+                Create a token at{' '}
+                <a
+                  href="https://github.com/settings/tokens/new?scopes=repo&description=BFC%20Logo%20Grid"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={styles.link}
+                >
+                  GitHub Settings
+                </a>
+                {' '}with "repo" scope.
+              </p>
+            </div>
+
+            {hasToken && (
+              <p style={{ ...styles.helpText, color: '#22c55e' }}>
+                Currently connected. Enter a new token to replace it.
+              </p>
+            )}
+
+            <div style={styles.modalActions}>
+              <button
+                style={{ ...styles.button, ...styles.cancelButton }}
+                onClick={() => setShowSettingsModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                style={{ ...styles.button, ...styles.saveButton }}
+                onClick={handleSaveToken}
+              >
+                Save Token
               </button>
             </div>
           </div>
