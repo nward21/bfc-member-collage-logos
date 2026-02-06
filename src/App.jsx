@@ -4,6 +4,11 @@ import { BfcLogoGrid } from './BfcLogoGrid';
 import { MemberEditor } from './MemberEditor';
 import membersData from '../members.json';
 
+const PNG_SIZES = {
+  landscape: { width: 1600, height: 900 },
+  square: { width: 1500, height: 1500 },
+};
+
 const styles = {
   dashboard: {
     minHeight: '100vh',
@@ -169,6 +174,13 @@ const styles = {
     fontSize: '12px',
     color: '#888',
   },
+  hiddenRender: {
+    position: 'fixed',
+    left: '-9999px',
+    top: 0,
+    visibility: 'hidden',
+    pointerEvents: 'none',
+  },
 };
 
 function App() {
@@ -178,8 +190,9 @@ function App() {
   const [generating, setGenerating] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [members, setMembers] = useState(membersData.members);
+  const [pngRender, setPngRender] = useState(null);
 
-  const previewRef = useRef(null);
+  const pngRef = useRef(null);
 
   const hostUrl = 'https://nward21.github.io/bfc-member-collage-logos';
 
@@ -201,18 +214,23 @@ function App() {
     const key = `${targetRatio}-${targetMode}`;
     setGenerating(key);
 
-    const prevRatio = ratio;
-    const prevMode = mode;
-    setRatio(targetRatio);
-    setMode(targetMode);
+    const size = PNG_SIZES[targetRatio];
 
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Set up the hidden render
+    setPngRender({ ratio: targetRatio, mode: targetMode, size });
 
-    if (previewRef.current) {
+    // Wait for render and images to load
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    if (pngRef.current) {
       try {
-        const canvas = await html2canvas(previewRef.current, {
+        const canvas = await html2canvas(pngRef.current, {
           backgroundColor: '#000',
-          scale: 2,
+          scale: 1,
+          width: size.width,
+          height: size.height,
+          useCORS: true,
+          allowTaint: true,
         });
 
         const link = document.createElement('a');
@@ -224,8 +242,7 @@ function App() {
       }
     }
 
-    setRatio(prevRatio);
-    setMode(prevMode);
+    setPngRender(null);
     setGenerating(null);
   };
 
@@ -243,10 +260,10 @@ function App() {
   };
 
   const pngOptions = [
-    { ratio: 'landscape', mode: 'tiered', label: 'Landscape Tiered', desc: '16:9 with tier labels' },
-    { ratio: 'landscape', mode: 'alphabetical', label: 'Landscape Alphabetical', desc: '16:9 sorted A-Z' },
-    { ratio: 'square', mode: 'tiered', label: 'Square Tiered', desc: '1:1 with tier labels' },
-    { ratio: 'square', mode: 'alphabetical', label: 'Square Alphabetical', desc: '1:1 sorted A-Z' },
+    { ratio: 'landscape', mode: 'tiered', label: 'Landscape Tiered', desc: '1600×900 with tier labels' },
+    { ratio: 'landscape', mode: 'alphabetical', label: 'Landscape Alphabetical', desc: '1600×900 sorted A-Z' },
+    { ratio: 'square', mode: 'tiered', label: 'Square Tiered', desc: '1500×1500 with tier labels' },
+    { ratio: 'square', mode: 'alphabetical', label: 'Square Alphabetical', desc: '1500×1500 sorted A-Z' },
   ];
 
   if (editMode) {
@@ -344,7 +361,7 @@ function App() {
 
       <section style={styles.previewSection}>
         <div style={styles.previewLabel}>Live Preview</div>
-        <div style={styles.previewContainer} ref={previewRef}>
+        <div style={styles.previewContainer}>
           <BfcLogoGrid
             ratio={ratio}
             mode={mode}
@@ -384,6 +401,19 @@ function App() {
           <code>{embedCode}</code>
         </pre>
       </section>
+
+      {/* Hidden render target for PNG generation */}
+      {pngRender && (
+        <div style={styles.hiddenRender} ref={pngRef}>
+          <BfcLogoGrid
+            ratio={pngRender.ratio}
+            mode={pngRender.mode}
+            members={members}
+            baseUrl=""
+            fixedSize={pngRender.size}
+          />
+        </div>
+      )}
     </div>
   );
 }
