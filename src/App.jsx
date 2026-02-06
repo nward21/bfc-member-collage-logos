@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
+import html2canvas from 'html2canvas';
 import { BfcLogoGrid } from './BfcLogoGrid';
 import membersData from '../members.json';
 
@@ -112,18 +113,6 @@ const styles = {
     whiteSpace: 'pre-wrap',
     wordBreak: 'break-all',
   },
-  tag: {
-    color: '#f7931a',
-  },
-  attr: {
-    color: '#9cdcfe',
-  },
-  string: {
-    color: '#ce9178',
-  },
-  comment: {
-    color: '#6a9955',
-  },
   statsBar: {
     display: 'flex',
     gap: '24px',
@@ -136,14 +125,52 @@ const styles = {
     color: '#fff',
     fontWeight: '600',
   },
+  pngSection: {
+    padding: '0 40px 40px',
+  },
+  pngGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '16px',
+    maxWidth: '600px',
+  },
+  pngButton: {
+    padding: '16px 24px',
+    fontSize: '14px',
+    fontWeight: '500',
+    border: '1px solid #444',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    backgroundColor: '#2a2a2a',
+    color: '#fff',
+    transition: 'all 0.2s ease',
+    textAlign: 'left',
+  },
+  pngButtonLabel: {
+    display: 'block',
+    fontSize: '14px',
+    fontWeight: '600',
+    marginBottom: '4px',
+  },
+  pngButtonDesc: {
+    fontSize: '12px',
+    color: '#888',
+  },
+  hiddenRender: {
+    position: 'absolute',
+    left: '-9999px',
+    top: 0,
+  },
 };
 
 function App() {
   const [ratio, setRatio] = useState('landscape');
   const [mode, setMode] = useState('tiered');
   const [copied, setCopied] = useState(false);
+  const [generating, setGenerating] = useState(null);
 
   const members = membersData.members;
+  const previewRef = useRef(null);
 
   const hostUrl = 'https://nward21.github.io/bfc-member-collage-logos';
 
@@ -161,6 +188,41 @@ function App() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const generatePNG = async (targetRatio, targetMode) => {
+    const key = `${targetRatio}-${targetMode}`;
+    setGenerating(key);
+
+    // Temporarily update the preview to the target settings
+    const prevRatio = ratio;
+    const prevMode = mode;
+    setRatio(targetRatio);
+    setMode(targetMode);
+
+    // Wait for render
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    if (previewRef.current) {
+      try {
+        const canvas = await html2canvas(previewRef.current, {
+          backgroundColor: '#000',
+          scale: 2,
+        });
+
+        const link = document.createElement('a');
+        link.download = `bfc-members-${targetRatio}-${targetMode}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      } catch (err) {
+        console.error('Failed to generate PNG:', err);
+      }
+    }
+
+    // Restore previous settings
+    setRatio(prevRatio);
+    setMode(prevMode);
+    setGenerating(null);
+  };
+
   const tierCounts = {
     founding: members.filter(m => m.tier === 'founding').length,
     chairmans_circle: members.filter(m => m.tier === 'chairmans_circle').length,
@@ -168,6 +230,13 @@ function App() {
     premier: members.filter(m => m.tier === 'premier').length,
     industry: members.filter(m => m.tier === 'industry').length,
   };
+
+  const pngOptions = [
+    { ratio: 'landscape', mode: 'tiered', label: 'Landscape Tiered', desc: '16:9 with tier labels' },
+    { ratio: 'landscape', mode: 'alphabetical', label: 'Landscape Alphabetical', desc: '16:9 sorted A-Z' },
+    { ratio: 'square', mode: 'tiered', label: 'Square Tiered', desc: '1:1 with tier labels' },
+    { ratio: 'square', mode: 'alphabetical', label: 'Square Alphabetical', desc: '1:1 sorted A-Z' },
+  ];
 
   return (
     <div style={styles.dashboard}>
@@ -238,13 +307,32 @@ function App() {
 
       <section style={styles.previewSection}>
         <div style={styles.previewLabel}>Live Preview</div>
-        <div style={styles.previewContainer}>
+        <div style={styles.previewContainer} ref={previewRef}>
           <BfcLogoGrid
             ratio={ratio}
             mode={mode}
             members={members}
             baseUrl=""
           />
+        </div>
+      </section>
+
+      <section style={styles.pngSection}>
+        <div style={styles.previewLabel}>Download PNG</div>
+        <div style={styles.pngGrid}>
+          {pngOptions.map(opt => (
+            <button
+              key={`${opt.ratio}-${opt.mode}`}
+              style={styles.pngButton}
+              onClick={() => generatePNG(opt.ratio, opt.mode)}
+              disabled={generating !== null}
+            >
+              <span style={styles.pngButtonLabel}>
+                {generating === `${opt.ratio}-${opt.mode}` ? 'Generating...' : opt.label}
+              </span>
+              <span style={styles.pngButtonDesc}>{opt.desc}</span>
+            </button>
+          ))}
         </div>
       </section>
 
